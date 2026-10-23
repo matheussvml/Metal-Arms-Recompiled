@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "name": "Metal Arms: Recompiled",
+      "repository": "matheussvml/Metal-Arms-Recompiled",
+      "folderName": "MetalArmsRecompiled",
+      "releaseAssetFilter": "windows-x64",
+      "tags": ["recomp", "gamecube"],
+      "appIconUrl": "https://raw.githubusercontent.com/matheussvml/Metal-Arms-Recompiled/main/assets/icon.png"
+    }
+  ]
+}

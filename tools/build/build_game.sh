@@ -30,7 +30,13 @@ for f in $RT_SRC; do RT_ARGS="$RT_ARGS ..\\..\\runtime\\$f"; done
 cmd.exe //c "..\\..\\tools\\build\\msvc.bat cl /nologo /c /O2 /Zi /W3 /MP16 /EHsc /D_CRT_SECURE_NO_WARNINGS \
     /I..\\..\\runtime /I. /Fort\\ /Fdrt\\ $RT_ARGS" \
     2>&1 | grep -v -E "vswhere|ou externo|^[a-z_0-9]+\.(c|cpp)$" || true
+# ícone e informações de versão (a versão vem do arquivo VERSION)
+IFS=. read -r VMAJ VMIN VPAT < <(tr -d "[:space:]" < ../../VERSION; echo) || true
+printf '#define VER_MAJOR %s\n#define VER_MINOR %s\n#define VER_PATCH %s\n#define VER_STR "%s.%s.%s"\n' \
+    "$VMAJ" "$VMIN" "$VPAT" "$VMAJ" "$VMIN" "$VPAT" > rt/version.h
+cmd.exe //c "..\\..\\tools\\build\\msvc.bat rc /nologo /Irt /fo rt\\metalarms.res ..\\..\\runtime\\metalarms.rc" \
+    2>&1 | grep -v -E "vswhere|ou externo" || true
 cmd.exe //c "..\\..\\tools\\build\\msvc.bat link /nologo /DEBUG /STACK:16777216 /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup /OUT:..\\metalarms.exe \
-    rt\\*.obj ppc_table.obj ppc_funcs_*.obj user32.lib d3d11.lib dxgi.lib d3dcompiler.lib winmm.lib dbghelp.lib comdlg32.lib" \
+    rt\\*.obj rt\\metalarms.res ppc_table.obj ppc_funcs_*.obj user32.lib d3d11.lib dxgi.lib d3dcompiler.lib winmm.lib dbghelp.lib comdlg32.lib" \
     2>&1 | grep -v -E "vswhere|ou externo" || true
 ls -la ../metalarms.exe

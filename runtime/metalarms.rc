@@ -1,0 +1,31 @@
+// Recursos do executável: ícone (Explorer, barra de tarefas, janela) e informações de versão.
+// VER_MAJOR/VER_MINOR/VER_PATCH e VER_STR vêm do arquivo VERSION (version.h gerado pelo build_game.sh).
+#include <winver.h>
+#include "version.h"
+
+1 ICON "../assets/metalarms.ico"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION VER_MAJOR, VER_MINOR, VER_PATCH, 0
+PRODUCTVERSION VER_MAJOR, VER_MINOR, VER_PATCH, 0
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "Metal Arms: Recompiled"
+            VALUE "ProductName", "Metal Arms: Recompiled"
+            VALUE "FileVersion", VER_STR
+            VALUE "ProductVersion", VER_STR
+            VALUE "OriginalFilename", "metalarms.exe"
+            VALUE "LegalCopyright", "GPL-3.0. Metal Arms belongs to its respective owners."
+            VALUE "Comments", "https://github.com/matheussvml/Metal-Arms-Recompiled"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

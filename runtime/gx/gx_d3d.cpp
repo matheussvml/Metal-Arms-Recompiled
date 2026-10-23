@@ -1181,6 +1181,7 @@ extern "C" int gxb_init(void) {
     wc.hInstance = GetModuleHandleW(nullptr);
     wc.lpszClassName = L"MetalArmsPort";
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wc.hIcon = LoadIconW(wc.hInstance, MAKEINTRESOURCEW(1)); // runtime/metalarms.rc
     RegisterClassW(&wc);
     g_back_w = kWinW;
     g_back_h = g_widescreen ? kWinW * 9 / 16 : kWinH;

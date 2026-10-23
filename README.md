@@ -1,138 +1,150 @@
-# Metal Arms: Glitch in the System — port nativo para PC
+# Metal Arms: Recompiled
 
-Recompilação estática do executável do GameCube (GM5E7D, EUA) para C, com um runtime nativo para Windows: gráficos em Direct3D 11, áudio pelo DSP emulado, memory card em arquivos e controle XInput/teclado. Não traz nada do jogo: tudo é lido da imagem de disco do usuário.
+**Metal Arms: Glitch in the System** running natively on Windows, built by statically recompiling the original GameCube executable to C. No emulator: the game's own code runs as a native PC program, with a modern renderer, mouse and keyboard controls, widescreen and higher resolutions.
 
-## Compilar
+[Português](README.pt-BR.md)
 
-Requisitos: Windows 10+, Visual Studio Build Tools (MSVC x64), Python 3, Git Bash.
+<p align="center">
+  <img src="docs/images/gameplay.jpg" width="49%" alt="Gameplay">
+  <img src="docs/images/title.jpg" width="49%" alt="Title screen">
+</p>
 
-O repositório não traz nada do jogo. Antes do primeiro build, extraia o executável do seu disco para `orig/GM5E7D/sys/main.dol` (SHA-1 `b01e7602f08f26219cda00bbfcee7985155821c2`):
+> [!IMPORTANT]
+> **You need your own copy of the game.** This project does not include any game code, data, music or video. On first launch you point it to a disc image of **Metal Arms: Glitch in the System** for the **GameCube (USA, GM5E7D)**, dumped from a disc you own.
 
-```bash
-python tools/gc_extract.py "<disco .ciso/.iso>" extracted   # grava extracted/main.dol (e main.elf)
-mkdir -p orig/GM5E7D/sys && cp extracted/main.dol orig/GM5E7D/sys/
-```
+## Features
 
-Depois:
+- Native Windows executable: all 42 campaign missions and 14 multiplayer arenas load and run (checked by an automated test; a full playthrough is still in progress)
+- Direct3D 11 renderer with internal resolution up to 4× (1280×1056 by default), anisotropic filtering and v-sync
+- Optional 16:9 widescreen with a wider field of view (the HUD stays in the 4:3 area)
+- Mouse aiming built for PC: the same turn per mouse movement on both axes, at any speed
+- Fully remappable keyboard and mouse controls
+- Up to 4 XInput controllers (Xbox and compatible) for local split-screen, with rumble
+- Original audio through an emulated GameCube DSP running the game's MusyX sound driver
+- Memory card saves stored as `.gci` files, compatible with Dolphin
+- Steady 60 FPS, with the renderer running on its own thread
 
-```bash
-bash tools/build/build_game.sh   # gera o C, compila (incremental) e linka build/metalarms.exe
-```
+<p align="center">
+  <img src="docs/images/widescreen.jpg" width="70%" alt="Widescreen">
+</p>
 
-O decomp-toolkit (`tools/bin/dtk.exe`, versão 1.8.4) só é necessário para refazer a análise do binário (`config/GM5E7D/symbols.txt` já está no repositório). Ele não é versionado e pode ser baixado em github.com/encounter/decomp-toolkit.
+## Requirements
 
-`bash tools/build/package.sh` monta `dist/MetalArmsPC` (exe, ROM livre do DSP e um LEIA-ME), pronto para copiar para outra pasta ou PC. O disco continua sendo o do usuário.
+- Windows 10 or 11 (64-bit) and a GPU with Direct3D 11 support
+- A disc image of **Metal Arms: Glitch in the System (USA)**, GameCube, game ID **GM5E7D**, in one of these formats:
+  - `.iso` / `.gcm` (raw disc image)
+  - `.ciso` (compact ISO)
 
-Um build completo leva cerca de 10 minutos. Acontece quando muda `runtime/ppc.h`, a lista de HLE ou o gerador. O incremental leva segundos.
+  RVZ, GCZ and WIA images are not read directly yet. Convert them to ISO in Dolphin: right-click the game → **Convert File...** → **ISO**.
 
-## Rodar
+Other regions (Europe, Japan) and the PlayStation 2 / Xbox versions are not supported.
 
-```bash
-./build/metalarms.exe                                                            # acha o disco sozinho
-./build/metalarms.exe "<caminho>/Metal Arms - Glitch in the System (USA).ciso"   # ou indica a imagem (.ciso/.iso/.gcm)
-```
+## Installation
 
-Também dá para abrir o `build/metalarms.exe` com dois cliques. O exe não abre janela de console: rodando de um terminal, o log sai nele; com dois cliques, vai para `metalarms.log` ao lado do exe, e erros aparecem numa caixa de mensagem. Caminhos relativos do ini (`saves`, `dsp_rom`) são procurados na pasta atual, na pasta do ini e uma pasta acima do exe.
+### Quiver Launcher
 
-Sem argumento, o port usa a chave `disco` do `metalarms.ini`. Se ela estiver vazia, procura uma imagem GM5E7D na pasta do executável, na pasta atual e nas subpastas delas; se não achar, abre uma janela para escolher o arquivo. O caminho encontrado fica gravado no ini.
+Add **Metal Arms: Recompiled** from the catalog and press Play. On first launch, choose your disc image (see below).
 
-Precisa de `data/dsp/dsp_rom.bin` e `data/dsp/dsp_coef.bin` (ROM livre do DSP do projeto Dolphin) para ter áudio; a pasta `data` é procurada na pasta atual, na do executável e uma acima. Os saves ficam em `saves/slotA/*.gci`. Os shaders compilados ficam em `shaders.cache`, ao lado do exe, e apagar esse arquivo só faz o jogo compilá-los de novo.
+### Manual
 
-### metalarms.ini
+1. Download the latest `MetalArmsRecompiled-<version>-windows-x64.zip` from the [Releases](https://github.com/matheussvml/Metal-Arms-Recompiled/releases) page.
+2. Extract it to any folder.
+3. Run `metalarms.exe`.
 
-Criado com os valores padrão ao lado do executável na primeira execução:
+### First launch
 
-| Chave | Efeito |
-|---|---|
-| `disco=` | imagem do disco (vazio = procurar) |
-| `escala=2` | resolução interna, 1 a 4 |
-| `tela_cheia=0` | 1 = começa em tela cheia sem bordas |
-| `vsync=1` | espera o monitor ao apresentar (0 = sem espera, pode rasgar a imagem) |
-| `anisotropia=8` | filtro anisotrópico (0 = como no GameCube, até 16) |
-| `teclado_separado=0` | 1 = teclado e mouse são o jogador 1 sozinhos e os controles viram os jogadores 2 a 4 |
-| `mouse=1` | mira com o mouse (0 = desliga) |
-| `mouse_sensibilidade=4` | ângulo por unidade de movimento do mouse (4 = ~0,14°) |
-| `mouse_sensibilidade_vertical=1` | multiplica só a vertical |
-| `mouse_inverter_y=0` | 1 = inverte o eixo vertical |
-| `widescreen=0` | 1 = 16:9 com mais campo de visão; o HUD fica na área 4:3 do centro |
-| `saves=saves/slotA` | pasta do memory card |
-| `dsp_rom=data/dsp` | pasta das ROMs do DSP |
-| `pular_videos=0` | 1 = vídeos com 1 quadro |
+The game looks for your disc image next to `metalarms.exe` (and in its subfolders). If it doesn't find one, a window opens so you can pick the file. The path is remembered in `metalarms.ini`, so this happens only once.
 
-As variáveis de ambiente `MA_*` abaixo têm prioridade sobre o ini.
+## Controls
 
-### Controles
-
-| GameCube | Controle XInput | Teclado e mouse |
+| Action | Controller | Keyboard and mouse |
 |---|---|---|
-| Analógico | analógico esquerdo | W A S D |
-| C-stick (mira) | analógico direito | mouse (ou I J K L) |
-| A (pular, confirmar) | A | Espaço |
-| B (voltar) | B | Tab |
+| Move | Left stick | W A S D |
+| Aim / camera | Right stick | Mouse (or I J K L) |
+| Jump / confirm (A) | A | Space |
+| Back (B) | B | Tab |
 | X / Y | X / Y | F / V |
-| Z (golpe de perto) | RB | botão direito do mouse |
+| Melee (Z) | RB | Right mouse button |
 | L | LT | Z |
-| R (atirar) | RT | botão esquerdo do mouse (ou E) |
-| Start (pausa) | Start | Esc (ou Enter) |
-| Direcional | direcional | setas |
+| Fire (R) | RT | Left mouse button (or E) |
+| Pause (Start) | Start | Esc (or Enter) |
+| D-pad | D-pad | Arrow keys |
 
-O mouse vale depois de um clique na janela, que o captura (cursor escondido e preso). A tecla abaixo do Esc (`'` no teclado ABNT2) mostra e esconde o cursor; trocar de janela também solta. A mira com o mouse é proporcional, com o mesmo ângulo por unidade de movimento nos dois eixos e em qualquer velocidade (ver "Mira com o mouse" abaixo). As teclas são configuráveis na seção `[teclado]` do `metalarms.ini`, com várias teclas por botão separadas por vírgula (`tecla_r=MOUSE_ESQ,E`). Um nome inválido gera um aviso no log e mantém a tecla padrão.
+- Click inside the window to capture the mouse. The key below Esc (`` ` `` on US keyboards, `'` on Brazilian ABNT2) shows or hides the cursor, and switching windows releases it.
+- **F11** toggles borderless fullscreen. The window can be resized freely.
+- Every key can be changed in the `[teclado]` section of `metalarms.ini`.
 
-### Mira com o mouse
+## Settings
 
-O jogo transforma o C-stick em giro com curvas próprias. Medido por quadro, a horizontal gira ~0,0006 rad com o C-stick em 0,25, ~0,045 em 1 e no máximo ~0,089 (~300°/s), com uma aceleração leve; a vertical gira ~0,0127 × v². O passo de tempo do jogo varia ±10% de um quadro para o outro. Por isso, simular o C-stick com o mouse deixava a vertical lenta, a diagonal mais lenta (o analógico é limitado a um círculo) e os movimentos lentos quase parados.
+`metalarms.ini` is created next to the executable on first launch. The keys are in Portuguese, the language of the original author:
 
-`mouse_aim`, em `runtime/hle_os.c`, roda depois que o jogo processa o controle (`Pad_SampleCallback`, `0x802C0438`) e soma ao C-stick do jogador 1:
+| Key | Default | Meaning |
+|---|---|---|
+| `escala` | `2` | Internal resolution multiplier, 1 to 4 |
+| `tela_cheia` | `0` | `1` = start in borderless fullscreen |
+| `widescreen` | `0` | `1` = 16:9 with a wider field of view |
+| `vsync` | `1` | `0` = don't wait for the monitor (may tear) |
+| `anisotropia` | `8` | Anisotropic filtering, `0` (like the GameCube) to `16` |
+| `mouse` | `1` | `0` = disable mouse aiming |
+| `mouse_sensibilidade` | `4` | Mouse sensitivity (4 ≈ 0.14° per mouse unit) |
+| `mouse_sensibilidade_vertical` | `1` | Extra multiplier for vertical aiming only |
+| `mouse_inverter_y` | `0` | `1` = invert vertical aiming |
+| `teclado_separado` | `0` | `1` = keyboard and mouse are player 1 alone; controllers become players 2–4 |
+| `pular_videos` | `0` | `1` = skip all videos |
+| `disco` | | Path to the disc image (filled in automatically) |
+| `saves` | `saves/slotA` | Memory card folder |
+| `tecla_<button>` | | Keyboard bindings, e.g. `tecla_a=ESPACO`, `tecla_r=MOUSE_ESQ,E` (several keys separated by commas) |
 
-- o movimento do mouse naquele quadro, convertido pela curva inversa medida (parte direta, sem esperar medição);
-- 25% do erro acumulado, medido pelo vetor global da mira em `0x80417308`, que muda no mesmo quadro do comando.
+## Saves
 
-Duas regras de freio cuidam das puxadas rápidas. O jogo tem velocidade máxima de giro horizontal, que começa em ~0,04 rad por quadro e acelera até ~0,09. Antes, o que a mão pedia além disso ficava acumulado, e a mira seguia girando sozinha por até ~0,4 s depois que a mão parava. Agora o atraso acumulado é limitado a 0,06 rad (~3,4°), e o excesso é descartado. Além disso, com o mouse parado, a correção nunca volta contra o último movimento, para não dar um tranco se o jogo passar um pouco do ponto. Numa puxada de 0,3 s a 3000 unidades/s, a mira gira o máximo que o jogo permite e para junto com a mão.
+Saves are stored in `saves/slotA` as `.gci` files, the same format Dolphin uses for GCI folder memory cards. You can copy saves between the two in both directions:
 
-A câmera (`0x804381C0`) repete esse vetor um quadro depois. Usar ela como referência, ou corrigir 100% do erro pela medição, fazia a mira passar do ponto e oscilar (velocidade alternando entre quadros), e piorava andando. Num teste andando, com dois círculos, cima/baixo e diagonais a 250 eventos por segundo, a velocidade acompanha o mouse sem oscilar, e a mira para em 1 ou 2 quadros quando o mouse para, sem voltar. `MA_AIM_TEST="início-fim:x:y,..."` soma um valor fixo ao C-stick processado, e `MA_TRACE="endereço,..."` registra vetores a cada quadro, para medir.
+- **From Dolphin:** set Memory Card Slot A to **GCI Folder** and copy the files from `Dolphin Emulator/GC/USA/Card A/` to `saves/slotA`.
+- **To Dolphin:** copy the files the other way.
 
-F11 alterna tela cheia sem bordas. A janela pode ser redimensionada, e a imagem fica sempre em 4:3 (16:9 com `widescreen=1`).
+## Known issues
 
-### Configuração (variáveis de ambiente)
+- Windows only. The renderer uses Direct3D 11.
+- Mouse turning is capped by the game's own maximum turn speed (~300°/s). Very fast flicks turn as far as the game allows and then stop.
+- Disc images must be ISO, GCM or CISO (see Requirements).
+- Local multiplayer with more than one controller has not been tested with real hardware yet.
+- The game has not been played from start to finish on this port yet. Each mission was checked to load and run, but problems may show up later in a mission.
 
-| Variável | Efeito |
-|---|---|
-| `MA_SCALE=1..4` | resolução interna (padrão 2 = 1280×1056 de EFB) |
-| `MA_WIDESCREEN=1` | imagem 16:9 (ver `docs/renderizador.md`) |
-| `MA_FULLSCREEN=1` | começa em tela cheia sem bordas |
-| `MA_VSYNC=0/1`, `MA_ANISO=0..16` | v-sync e filtro anisotrópico |
-| `MA_DSP_ROM=<pasta>` | outra pasta com as ROMs do DSP (por exemplo, um dump do próprio console) |
-| `MA_SKIP_MOVIES=1` | encurta todos os vídeos Bink para 1 quadro (desenvolvimento) |
-| `MA_SAVE_DIR=<pasta>` | pasta do memory card (padrão `saves/slotA`); use uma separada nos testes automáticos |
+Found a problem? [Open an issue](https://github.com/matheussvml/Metal-Arms-Recompiled/issues) with the end of `metalarms.log` (next to the executable) and, if it's visual, a screenshot.
 
-### Diagnóstico
+## Building from source
 
-| Variável | Efeito |
-|---|---|
-| `-v` (argumento) | log detalhado: DVD, memory card, mailboxes, criação de shaders |
-| `MA_SHOT_DIR=<pasta>`, `MA_SHOT_EVERY=N` | salva um PNG a cada N quadros |
-| `MA_INPUT="1200:A,1400:START"` | aperta botões em retraces definidos (testes sem teclado) |
-| `MA_GX_TRACE=<quadro>` | lista todos os desenhos e cópias do EFB daquele quadro |
-| `MA_COPY_DUMP=<quadro>` | salva em `MA_SHOT_DIR` as seis primeiras cópias de EFB para textura a partir do quadro |
-| `MA_PROFILE=<espera>,<duração>` | profiler por amostragem da thread principal |
-| `MA_WAV_DUMP=arquivo.wav` | grava a saída de áudio |
-| `MA_FIFO_DUMP=arquivo` | grava o fluxo de comandos GX |
-| `MA_DSP_LOG=1` | mensagens trocadas entre CPU e DSP |
-| `MA_GX_DEBUG_ORTHO=máscara`, `MA_NO_BATCH=1`, `MA_BATCH_CHECK=1` | diagnóstico do renderizador |
-| `MA_LEVEL=<entrada>` | começa direto na fase pedida (tabela em [docs/fases.md](docs/fases.md)); só para testes |
-| `MA_RAM_DUMP=<retrace>` | grava os 24 MiB da RAM em `ram_<retrace>.bin` |
-| `MA_GPU_SYNC=1` | interpreta o FIFO na thread do jogo (sem a thread da GPU), para comparar |
+Requirements: Visual Studio Build Tools (MSVC x64), Python 3 and Git Bash. The game's executable (`main.dol`) comes from your own disc and is never committed:
 
-## Documentação
+```bash
+python tools/gc_extract.py "<your disc .iso/.ciso>" extracted
+mkdir -p orig/GM5E7D/sys && cp extracted/main.dol orig/GM5E7D/sys/
+bash tools/build/build_game.sh   # -> build/metalarms.exe
+bash tools/build/package.sh      # -> dist/MetalArmsRecompiled-<version>-windows-x64.zip
+```
 
-- [docs/mapa_do_binario.md](docs/mapa_do_binario.md): regiões do `main.dol` e como os símbolos foram obtidos.
-- [docs/recompilador.md](docs/recompilador.md): gerador PowerPC → C, runtime e boot.
-- [docs/renderizador.md](docs/renderizador.md): GX → Direct3D 11.
-- [docs/audio.md](docs/audio.md): emulação do DSP e MusyX.
-- [docs/memory_card.md](docs/memory_card.md): saves em GCI.
-- [docs/desempenho.md](docs/desempenho.md): medições e decisões de desempenho.
-- [docs/fases.md](docs/fases.md): tabela de fases do jogo e como começar direto numa delas.
+The technical documentation (in Portuguese) is in [docs/](docs/desenvolvimento.md): the recompiler, the renderer, audio, memory card, performance and the developer options.
 
-## Licenças
+## How it works
 
-O comportamento do DSP segue a documentação de engenharia reversa do Dolphin, e a ROM do DSP em `data/dsp` é a versão livre do Dolphin (GPLv2). Para distribuir o port, isso precisa ser considerado.
+`recomp/gen.py` translates every PowerPC function of the game's executable into C. Function boundaries come from an analysis made with decomp-toolkit, plus Dolphin's SDK signatures and manually identified functions. The resulting C code is compiled together with a runtime that replaces the GameCube hardware:
+
+- **CPU and OS:** the game's threads run as Windows fibers. Disc access, memory card and controllers are reimplemented natively (HLE).
+- **Graphics:** the GX command stream is interpreted on its own thread and drawn with Direct3D 11. The TEV pipeline is translated into generated pixel shaders, and textures are decoded from every GameCube format.
+- **Audio:** the GameCube DSP is emulated with the game's original MusyX microcode.
+- **Timing:** video interrupts, audio DMA and the rest of the hardware timing follow the console.
+
+## Credits
+
+- **Dolphin Emulator** team: the GameCube hardware documentation this port relies on, the free DSP ROM shipped in `data/dsp` (GPLv2) and the SDK signature database used to name functions.
+- **decomp-toolkit** by encounter: analysis of the executable.
+- The **N64: Recompiled** and **Nebula** projects, which inspired the approach.
+- **Swingin' Ape Studios** and **Vivendi Universal Games**, creators and publisher of Metal Arms: Glitch in the System.
+
+## License
+
+The code in this repository is licensed under the [GNU General Public License v3.0](LICENSE). The free DSP ROM in `data/dsp` and the SDK signature database in `tools/sigs` come from the Dolphin Emulator project (GPL-2.0-or-later). The license does not cover the game itself: its code, data, names and trademarks belong to their owners.
+
+## Legal
+
+This is an unofficial fan project. It is not affiliated with, endorsed or sponsored by Swingin' Ape Studios, Vivendi, Activision Blizzard or Nintendo. Metal Arms: Glitch in the System and all related names and assets belong to their respective owners. This repository and its releases contain no game data: you must supply a disc image dumped from a copy you legally own. The program icon (`assets/`) and the screenshots in `docs/images` show the game's own artwork, which belongs to its owners.

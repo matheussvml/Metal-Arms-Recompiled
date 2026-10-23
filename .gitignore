@@ -1,0 +1,37 @@
+# Material do jogo: nunca versionar (cada um usa o próprio disco)
+*.iso
+*.ciso
+*.gcm
+*.7z
+*.dol
+*.elf
+/Metal Arms - Glitch in the System (USA)/
+/orig/
+/extracted/
+
+# Gerado pelo build (inclui o código recompilado do jogo)
+/build/
+/dist/
+__pycache__/
+*.pyc
+*.obj
+*.pdb
+*.ilk
+/tests/test_core.exe
+
+# Saves, backups e arquivos de cada máquina
+/saves/
+/saves_bak_*/
+/backups/
+*.gci
+metalarms.ini
+metalarms.log
+shaders.cache
+
+# Diagnóstico
+ram_*.bin
+*.wav
+*.bak
+
+# Ferramenta de terceiros (baixar: decomp-toolkit 1.8.4, github.com/encounter/decomp-toolkit)
+/tools/bin/

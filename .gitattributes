@@ -1,0 +1,5 @@
+# LF em tudo (os scripts .sh quebram no bash com CRLF); .bat continua CRLF
+* text=auto eol=lf
+*.bat text eol=crlf
+*.bin binary
+*.dsy binary

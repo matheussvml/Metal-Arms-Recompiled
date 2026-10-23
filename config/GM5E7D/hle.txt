@@ -1,0 +1,78 @@
+# Funções do SDK substituídas por implementações nativas (runtime/hle_*.c, runtime/sched.c).
+# A versão recompilada continua disponível como f_<endereço>_orig.
+
+# threads (runtime/sched.c)
+__OSThreadInit
+OSCreateThread
+OSResumeThread
+OSSuspendThread
+OSSleepThread
+OSWakeupThread
+OSYieldThread
+OSDisableScheduler
+OSEnableScheduler
+OSExitThread
+OSCancelThread
+
+# OS (runtime/hle_os.c)
+OSReport
+OSPanic
+OSResetSystem
+OSCreateAlarm
+OSSetAlarm
+OSSetPeriodicAlarm
+OSCancelAlarm
+
+# DVD (runtime/hle_dvd.c)
+DVDInit
+DVDReadAbsAsyncPrio
+DVDReadAbsAsyncForBS
+DVDReadDiskID
+DVDInquiryAsync
+DVDCancelStreamAsync
+DVDCancelAsync
+DVDCancel
+DVDGetDriveStatus
+DVDCheckDisk
+DVDResume
+DVDReset
+
+# controle
+PADInit
+PADRead
+PADReset
+PADRecalibrate
+PADControlMotor
+PADSetSamplingCallback
+
+# memory card em arquivos .gci (runtime/hle_card.c)
+CARDInit
+CARDProbeEx
+CARDMount
+CARDMountAsync
+CARDCheck
+CARDCheckExAsync
+CARDGetSectorSize
+CARDFreeBlocks
+CARDFormat
+CARDOpen
+CARDFastOpen
+CARDClose
+CARDCreate
+CARDCreateAsync
+CARDRead
+CARDReadAsync
+CARDWrite
+CARDWriteAsync
+CARDDeleteAsync
+CARDGetStatus
+CARDSetStatusAsync
+CARDUnmount
+OSGetSoundMode
+
+# vídeos (runtime/hle_os.c): MA_SKIP_MOVIES=1 pula os Bink (desenvolvimento)
+BinkOpen
+
+# jogo (runtime/hle_os.c)
+Level_FindIndex
+Pad_SampleCallback

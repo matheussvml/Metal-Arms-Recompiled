@@ -1,0 +1,43 @@
+# endereço	nome	confiança	evidência
+# Nomes identificados à mão (ordem de link do SDK + chamadas + instruções). Aplicar com tools/apply_manual.py.
+0x8033C1CC	OSGetStackPointer	alta	mr r3, r1; blr — chamado por OSClearStack e OSPanic
+0x8033C1F8	OSInitContext	alta	entre OSClearContext e OSDumpContext (OSContext.c); chama OSClearContext; usado por OSCreateThread
+0x8033F070	OSInitSemaphore	alta	OSSemaphore.c antes de OSSync; Disable/OSInitThreadQueue/Restore
+0x8033F0C8	OSWaitSemaphore	alta	Disable/OSSleepThread/Restore
+0x8033F138	OSSignalSemaphore	alta	Disable/OSWakeupThread/Restore
+0x8033F198	OSGetSemaphoreCount	media	0x20 sem chamadas, último do OSSemaphore.c
+0x8033F21C	DefaultSwitchThreadCallback	media	blr isolado no início do OSThread.c
+0x8033F388	OSGetCurrentThread	alta	lwz r3, 0x800000E4
+0x8033F394	OSIsThreadTerminated	alta	testa thread->state (0x2C8) == 8 (MORIBUND) ou 0
+0x8033F940	OSCreateThread	alta	valida prioridade 0..31, state=1 em 0x2C8, chama OSInitContext; chamado por main
+0x8033FB28	OSExitThread	alta	OSClearContext + __OSUnlockAllMutex + OSWakeupThread(join) + SelectThread
+0x80340618	ClampStick	media	Padclamp.c, sem chamadas, chamado por PADClamp
+0x80340748	PADClamp	media	Padclamp.c, chama ClampStick
+0x80340AC4	PADOriginUpdateCallback	media	ordem do Pad.c, UpdateOrigin + SIDisablePolling + OSSetWirelessID
+0x80340F88	PADReceiveCheckCallback	media	ordem do Pad.c, SITransfer + OSSetWirelessID
+0x803410BC	PADReset	media	ordem do Pad.c (antes de PADRecalibrate)
+0x803411BC	PADRecalibrate	media	ordem do Pad.c
+0x803412C0	PADInit	alta	OSRegisterVersion + PADSetSpec + SIRefreshSamplingRate + OSRegisterResetFunction
+0x803414D8	PADRead	alta	SIIsChanBusy + SIGetStatus + SIGetTypeAsync, logo após PADInit
+0x80341884	PADControlMotor	media	SIGetType + SISetCommand + SITransferCommands
+0x8034199C	SPEC0_MakeStatus	media	após PADSetSpec, sem chamadas
+0x80341B10	SPEC1_MakeStatus	media	após SPEC0_MakeStatus, mesmo tamanho
+0x80341C84	SPEC2_MakeStatus	media	após SPEC1_MakeStatus, maior (clamp analógico)
+0x8034207C	PAD_OnReset	media	OnReset estático do Pad.c (PADSetSamplingCallback + SIBusy); prefixado para evitar colisão
+0x8032D5E4	entryToPath	media	dvdfs.c, chamado por DVDGetCurrentDir
+0x8032D744	DVDGetCurrentDir	media	dvdfs.c, chamado por DVDOpen no caminho de erro
+0x8032D988	DVDOpen	alta	DVDConvertPathToEntrynum + OSReport("file not found") + DVDGetCurrentDir
+0x80324CC0	__CARDSyncCallback	media	CARDBios.c, OSWakeupThread
+0x80325F0C	__CARDSync	media	CARDBios.c, OSSleepThread em loop
+0x803621BC	sndInit	alta	chama hwInit, synthInit, seqInit, s3dInit, dataInit, vsInit (MusyX)
+0x80325E88	CARDGetSectorSize	alta	*out = CARDControl.sectorSize (0xC); chamado pelo código de montagem do jogo
+0x80328A50	CARDCheck	alta	CARDCheckExAsync(chan, &xfer, __CARDSyncCallback) + __CARDSync
+0x803293D4	CARDMount	alta	CARDMountAsync + __CARDSync
+0x80329D00	CARDFormat	alta	__CARDFormatRegionAsync + __CARDSync
+0x8032A1C8	CARDFastOpen	media	entre __CARDGetFileNo e CARDOpen; __CARDIsWritable por número de arquivo
+0x8032A794	CARDCreate	alta	CARDCreateAsync + __CARDSync
+0x8032AC08	CARDRead	alta	CARDReadAsync + __CARDSync
+0x8032AF84	CARDWrite	alta	CARDWriteAsync + __CARDSync
+0x80368A50	BinkOpen	alta	mensagens "Not a Bink file."/"Error opening file."; chamado pelo player de vídeo do jogo (fn_80309FC4)
+0x801B0A74	Level_FindIndex	alta	procura o título na tabela de fases 0x803C93C0 (44 bytes por entrada, fn_80280508 = comparação de strings); o retorno vira o índice da fase atual (lbl_804B891C) em fn_801B0AE8
+0x802C0438	Pad_SampleCallback	alta	registrada pelo PADSetSamplingCallback; chama PADRead/PADClamp e grava por controle registros de 0x50 bytes em float (ponteiros em 0x804B9888, índice em 0x804B988C): +0x0C/+0x10 analógico, +0x14/+0x18 C-stick

@@ -1,0 +1,7 @@
+object: orig/GM5E7D/sys/main.dol
+hash: b01e7602f08f26219cda00bbfcee7985155821c2
+symbols: config/GM5E7D/symbols.txt
+splits: config/GM5E7D/splits.txt
+detect_objects: true
+detect_strings: true
+write_asm: true
